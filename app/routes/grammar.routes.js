@@ -3,5 +3,5 @@ module.exports = (app) => {
 
   app.post('/grammar_check', grammar.grammar_check);
 
-  app.get('/get_grammar/:id', grammar.get_grammar);
+  app.get('/get_grammar', grammar.get_grammar);
 }

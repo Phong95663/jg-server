@@ -4,33 +4,25 @@ const Kuroshiro = require('kuroshiro');
 const analyzer = require('kuroshiro-analyzer-kuromoji');
 const MeCab = require('mecab-async');
 const _ = require('lodash');
+const Cabocha = require('node-cabocha');
 const mecab = new MeCab();
 const kuroshiro = new Kuroshiro();
+const cabocha = new Cabocha();
 kuroshiro.init(new analyzer());
 
-// mecab.parser = data => {
-//   kanji: data[0],
-//   lexical: data[1],
-//   compound: data[2],
-//   compound2     : data[3],
-//   compound3     : data[4],
-//   conjugation   : data[5],
-//   inflection    : data[6],
-//   original      : data[7],
-//   reading       : data[8],
-//   pronunciation : data[9] || ''
-// };
-// mecab.wakachi('あのレストランは安いし、うまい。', function (err, result) {
-//   if (err) throw err;
-//   console.log(result);
-// });
+let parseSring = async (str) => {
+  return new Promise((resolve, reject) => {
+    cabocha.parse(str, (result) => {
+      let arr = result.depRels.map(ele => ele[1]);
+      resolve(arr);
+    })
+  })
+}
 
 let convertKana = async (str) => {
   const res = await kuroshiro.convert(str, { to: "katakana" });
   return res;
 }
-// let a = _.intersection(['の', 'は', '...', 'ため', 'だ'], ['彼', 'の', '一見', '痴鈍', 'らしい', 'の', 'は', '長く', '脳病', 'を', '煩っ', 'た', 'ため', 'だ', '...', '～']);
-// console.log(_.isEqual(a, ['の', 'は', '...', 'ため', 'だ']));
 exports.grammar_check = async (req, res) => {
   const arr = new Set();
   const response = [];
@@ -45,9 +37,6 @@ exports.grammar_check = async (req, res) => {
   let grammars = await grammar.find();
   // console.log(grammars);
   grammars.map(grammar => {
-    // console.log(inputWordSet);
-    // console.log(grammarTitleWordSet);
-    // console.log('*****', _.intersection(grammarTitleWordSet, inputWordSet) == grammarTitleWordSet)
     let titleFix = grammar.titleKana;
     if (titleFix.includes('～') || grammar.titleKana.includes('...')) {
       titleFix = titleFix.replace('～', '');
@@ -62,18 +51,29 @@ exports.grammar_check = async (req, res) => {
       console.log(inputWordSet);
       console.log("*****",grammarTitleWordSet);
       let intersection = _.intersection(grammarTitleWordSet, inputWordSet);
+      //So sanh WordSet
       if (_.isEqual(intersection, grammarTitleWordSet)) {
         arr.add(grammar.title);
       }
-      // console.log(inputKana.match(pattern));
     }
   })
   Array.from(arr).map(ele => {
-    response.push({ title: ele})
+    let eleText = ele.replace('...', '').replace('～', '');
+    let count = 0;
+    Array.from(arr).forEach(ele => {
+      if (ele.includes(eleText)) {
+        count++;
+      }
+    });
+    if (count == 1) {
+      response.push({ title: ele })
+    }
   });
-  // console.log(response);
+  console.log(response);
   res.send(response);
 };
-exports.get_grammar = (req, res) => {
-
+exports.get_grammar = async (req, res) => {
+  let queryString = req.query;
+  let grammars = await grammar.find({ title: queryString.title });
+  res.send(grammars);
 };
