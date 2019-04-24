@@ -45,31 +45,43 @@ exports.grammar_check = async (req, res) => {
     let pattern = new RegExp(titleFix);
     // console.log(titleFix);
     if (inputKana.match(pattern)) {
+      console.log('********grammar1', grammar.title)
       let grammarTitleWordSet = mecab.wakachiSync(grammar.title, function (err, result) {
         if (err) throw err;
       });
-      console.log(inputWordSet);
-      console.log("*****",grammarTitleWordSet);
+      // console.log(inputWordSet);
+      // console.log("*****",grammarTitleWordSet);
       let intersection = _.intersection(grammarTitleWordSet, inputWordSet);
       //So sanh WordSet
       if (_.isEqual(intersection, grammarTitleWordSet)) {
+        console.log('******grammar2', grammar.title)
         arr.add(grammar.title);
+        console.log(arr)
       }
     }
   })
+  // Array.from(arr).map(ele => {
+  //   let eleText = ele.replace('...', '').replace('～', '');
+  //   let count = 0;
+  //   Array.from(arr).forEach(ele => {
+  //     if (ele.includes(eleText)) {
+  //       count++;
+  //     }
+  //   });
+  //   if (count == 1) {
+  //     // let startIndex;
+  //     // let endIndex;
+
+  //     response.push({ title: ele })
+  //   }
+  // });
+
+  console.log(response);
   Array.from(arr).map(ele => {
-    let eleText = ele.replace('...', '').replace('～', '');
-    let count = 0;
-    Array.from(arr).forEach(ele => {
-      if (ele.includes(eleText)) {
-        count++;
-      }
-    });
-    if (count == 1) {
+    if (ele.replace('～', '').replace('...', '').length > 1) {
       response.push({ title: ele })
     }
-  });
-  console.log(response);
+  })
   res.send(response);
 };
 exports.get_grammar = async (req, res) => {
