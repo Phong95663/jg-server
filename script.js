@@ -21,10 +21,13 @@ db.once('open', function () {
     for (let i = 0; i < len; i++) {
       const gramma = allGramma[i];
       // gramma.title = gramma.title.replace(/\(.*\)/, '');
-      if (gramma.title.charAt(0) == '～' || gramma.title.charAt(0) == '.') {
-        gramma.title = gramma.title.substr(3);
-        gramma.titleKana = gramma.titleKana.substr(1);
-      }
+      //Xoa ki tu dau
+      // if (gramma.title.charAt(0) == '～' || gramma.title.charAt(0) == '.') {
+      //   gramma.title = gramma.title.substr(3);
+      //   gramma.titleKana = gramma.titleKana.substr(1);
+      // }
+      gramma.title = gramma.title.replace(/\s/g, '');
+      gramma.titleKana = gramma.titleKana.replace(/\s/g, '');
       gramma.save();
     }
   });

@@ -53,11 +53,11 @@ exports.grammar_check = async (req, res) => {
       // console.log("*****",grammarTitleWordSet);
       let intersection = _.intersection(grammarTitleWordSet, inputWordSet);
       //So sanh WordSet
-      if (_.isEqual(intersection, grammarTitleWordSet)) {
-        console.log('******grammar2', grammar.title)
+      // if (_.isEqual(intersection, grammarTitleWordSet)) {
+      //   console.log('******grammar2', grammar.title)
         arr.add(grammar.title);
-        console.log(arr)
-      }
+      //   console.log(arr)
+      // }
     }
   })
   // Array.from(arr).map(ele => {
@@ -78,8 +78,16 @@ exports.grammar_check = async (req, res) => {
 
   console.log(response);
   Array.from(arr).map(ele => {
+    let count = 0;
     if (ele.replace('～', '').replace('...', '').length > 1) {
-      response.push({ title: ele })
+      Array.from(arr).forEach(elem => {
+        if (elem.includes(ele)) {
+          count++;
+        }
+      });
+      if (count == 1) {
+        response.push({ title: ele })
+      }
     }
   })
   res.send(response);
