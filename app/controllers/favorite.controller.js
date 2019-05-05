@@ -1,4 +1,5 @@
 const Favorite = require('../models/favorite.model');
+const grammar = require('../models/grammar.model.js');
 
 exports.create = async (req, res) => {
   // Validate request
@@ -46,6 +47,15 @@ exports.delete = async (req, res) => {
     });
 }
 
-exports.get_favorite_list = async () => {
-
+exports.findAll = async (req, res) => {
+  console.log("--------", req.params)
+  const user = req.params.uid;
+  Favorite.find({ user: user })
+    .then(favorites => {
+      res.send(favorites);
+    }).catch(err => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving favorite"
+      });
+    });
 }

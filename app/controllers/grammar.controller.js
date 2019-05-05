@@ -34,7 +34,7 @@ exports.grammar_check = async (req, res) => {
   inputWordSet.push('...');
   inputWordSet.push('～');
   // console.log(inputKana)
-  let grammars = await grammar.find();
+  let grammars = await grammar.find({}, {_id: 1, title: 1, titleKana:1});
   // console.log(grammars);
   grammars.map(grammar => {
     let titleFix = grammar.titleKana;
@@ -45,7 +45,7 @@ exports.grammar_check = async (req, res) => {
     let pattern = new RegExp(titleFix);
     // console.log(titleFix);
     if (inputKana.match(pattern)) {
-      console.log('********grammar1', grammar.title)
+      // console.log('********grammar1', grammar.title)
       let grammarTitleWordSet = mecab.wakachiSync(grammar.title, function (err, result) {
         if (err) throw err;
       });
@@ -55,8 +55,8 @@ exports.grammar_check = async (req, res) => {
       //So sanh WordSet
       // if (_.isEqual(intersection, grammarTitleWordSet)) {
       //   console.log('******grammar2', grammar.title)
-        arr.add(grammar.title);
-      //   console.log(arr)
+        arr.add(grammar);
+        // console.log(arr)
       // }
     }
   })
@@ -76,24 +76,33 @@ exports.grammar_check = async (req, res) => {
   //   }
   // });
 
-  console.log(response);
+  // console.log(response);
   Array.from(arr).map(ele => {
     let count = 0;
-    if (ele.replace('～', '').replace('...', '').length > 1) {
+    const title1 = ele.title;
+    if (title1.replace('～', '').replace('...', '').length > 1) {
       Array.from(arr).forEach(elem => {
-        if (elem.includes(ele)) {
+        let title = elem.title;
+        if (title.includes(title1)) {
           count++;
         }
       });
       if (count == 1) {
-        response.push({ title: ele })
+        response.push({ id: ele._id, title: ele.title })
       }
     }
   })
+  console.log(response);
   res.send(response);
 };
 exports.get_grammar = async (req, res) => {
-  let queryString = req.query;
-  let grammars = await grammar.find({ title: queryString.title });
+  let data = req.body.data;
+  let grammars = await grammar.find({title: data});
   res.send(grammars);
 };
+
+exports.findOne = async (req, res) => {
+  let data = req.params.id;
+  let response = await grammar.find({ _id: data });
+  res.send(response);
+}
