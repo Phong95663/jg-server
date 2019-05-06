@@ -11,6 +11,7 @@ exports.create = async (req, res) => {
   }
 
   const favorite = new Favorite({
+    _id: `${req.body.user}-${req.body.grammar}`,
     user: req.body.user,
     grammar: req.body.grammar
   });

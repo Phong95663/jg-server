@@ -6,4 +6,6 @@ module.exports = (app) => {
   app.delete('/api/v1/favorite/:favoriteId', favorite.delete);
 
   app.get('/api/v1/favorite/:uid', favorite.findAll);
+
+  app.get('/api/v1/favorite/:uid')
 }
